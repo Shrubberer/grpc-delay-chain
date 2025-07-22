@@ -74,7 +74,19 @@ You can deploy the same image in multiple namespaces with different behavior:
 
 ## Testing with grpcurl
 ```
+# port forward in three terminals (or panes)
+# NOTE: define the namespace, it is *not* redundant if you use termninal panes
+
 oc port-forward svc/grpc-delay-server 50051:50051 -n ns-a
+oc port-forward svc/grpc-delay-server 50051:50051 -n ns-b
+oc port-forward svc/grpc-delay-server 50051:50051 -n ns-c
+# follow logs for each namespace
+oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.name}') -f -n ns-a
+oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.name}') -f -n ns-b
+oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.name}') -f -n ns-c
+
 grpcurl -plaintext -import-path . -proto hello.proto -d '{"name":"Alice"}' localhost:50051 hello.HelloService/SayHello
+
+
 ```
 
