@@ -36,20 +36,30 @@ The service is configured entirely via environment variables:
 ---
 ## Installation
 ```
-### Create namespace
+# === Create projects (replace ns-a with ns-b or ns-c as needed)
 oc new-project ns-a
 
-### Create a new binary build from your local directory (must include Dockerfile, hello.proto, server.py)
+# === Create binary build from your local source (Dockerfile, hello.proto, server.py must be present)
 oc new-build --binary --name=grpc-delay-server -l app=grpc-delay-server
 oc start-build grpc-delay-server --from-dir=. --follow
 oc new-app grpc-delay-server
 
-### Set environment variables (change as needed for ns-b and ns-c)
-## For ns-b: use LISTEN_PORT=50052 and FORWARD_HOST=grpc-delay-c.ns-c.svc.cluster.local, FORWARD_PORT=50053
-# For ns-c (final hop): use LISTEN_PORT=50053 and omit FORWARD_HOST and FORWARD_PORT entirely
+# === Set environment variables (adjust LISTEN_PORT and FORWARD targets based on namespace)
 
-oc set env deployment/grpc-delay-server LISTEN_PORT=50051 DELAY_MS=1000 FORWARD_HOST=grpc-delay-b.ns-b.svc.cluster.local FORWARD_PORT=50052
+# Example for ns-a (forwards to ns-b)
+oc set env deployment/grpc-delay-server LISTEN_PORT=50051 DELAY_MS=1000 FORWARD_HOST=grpc-delay-server.ns-b.svc.cluster.local FORWARD_PORT=50052
+
+# Example for ns-b (forwards to ns-c)
+# oc set env deployment/grpc-delay-server LISTEN_PORT=50052 DELAY_MS=1000 FORWARD_HOST=grpc-delay-server.ns-c.svc.cluster.local FORWARD_PORT=50053
+
+# Example for ns-c (final hop, no forwarding)
+# oc set env deployment/grpc-delay-server LISTEN_PORT=50053 DELAY_MS=1000
+
+# === Expose the deployment as a service (must match LISTEN_PORT)
 oc expose deployment grpc-delay-server --port=50051 --name=grpc-delay-server
+# For ns-b use: oc expose deployment grpc-delay-server --port=50052 --name=grpc-delay-server
+# For ns-c use: oc expose deployment grpc-delay-server --port=50053 --name=grpc-delay-server
+
 ```
 ---
 ## Example Chained Setup
