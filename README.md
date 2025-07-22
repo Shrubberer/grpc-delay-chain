@@ -42,7 +42,7 @@ oc new-project ns-a
 # === Create binary build from your local source (Dockerfile, hello.proto, server.py must be present)
 oc new-build --binary --name=grpc-delay-server -l app=grpc-delay-server
 oc start-build grpc-delay-server --from-dir=. --follow
-oc new-app grpc-delay-server
+oc new-app grpc-delay-server -l app=grpc-delay-server
 
 # === Set environment variables (adjust LISTEN_PORT and FORWARD targets based on namespace)
 
