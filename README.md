@@ -35,7 +35,12 @@ The service is configured entirely via environment variables:
 
 ---
 ## Installation
+1) connect to openshift cluster
+2) run install.sh
+
+Or install manually (e.g. if you want to customize )
 ```
+Manual installation
 # === Create projects (replace ns-a with ns-b or ns-c as needed)
 oc new-project ns-a
 
