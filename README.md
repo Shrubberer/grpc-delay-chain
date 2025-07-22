@@ -18,7 +18,8 @@ Upon receiving a `SayHello` request, the service:
 
 ---
 
-## Configuration
+##
+Configuration
 
 The service is configured entirely via environment variables:
 
@@ -34,21 +35,22 @@ The service is configured entirely via environment variables:
 
 ---
 ## Installation
-# Create namespace
+```
+### Create namespace
 oc new-project ns-a
 
-# Create a new binary build from your local directory (must include Dockerfile, hello.proto, server.py)
+### Create a new binary build from your local directory (must include Dockerfile, hello.proto, server.py)
 oc new-build --binary --name=grpc-delay-server -l app=grpc-delay-server
 oc start-build grpc-delay-server --from-dir=. --follow
 oc new-app grpc-delay-server
 
-# Set environment variables (change as needed for ns-b and ns-c)
-# For ns-b: use LISTEN_PORT=50052 and FORWARD_HOST=grpc-delay-c.ns-c.svc.cluster.local, FORWARD_PORT=50053
+### Set environment variables (change as needed for ns-b and ns-c)
+## For ns-b: use LISTEN_PORT=50052 and FORWARD_HOST=grpc-delay-c.ns-c.svc.cluster.local, FORWARD_PORT=50053
 # For ns-c (final hop): use LISTEN_PORT=50053 and omit FORWARD_HOST and FORWARD_PORT entirely
 
 oc set env deployment/grpc-delay-server LISTEN_PORT=50051 DELAY_MS=1000 FORWARD_HOST=grpc-delay-b.ns-b.svc.cluster.local FORWARD_PORT=50052
 oc expose deployment grpc-delay-server --port=50051 --name=grpc-delay-server
-
+```
 ---
 ## Example Chained Setup
 
@@ -61,7 +63,8 @@ You can deploy the same image in multiple namespaces with different behavior:
 ---
 
 ## Testing with grpcurl
-
+```
 oc port-forward svc/grpc-delay-server 50051:50051 -n ns-a
 grpcurl -plaintext -import-path . -proto hello.proto -d '{"name":"Alice"}' localhost:50051 hello.HelloService/SayHello
+```
 
