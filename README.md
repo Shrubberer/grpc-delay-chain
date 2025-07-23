@@ -1,6 +1,6 @@
 # gRPC Delay + Forward Service
 
-A minimal Python gRPC service for chained request testing, latency simulation, and multi-hop behavior modeling in Kubernetes or OpenShift.
+A minimal Python gRPC service for chained request testing, latency simulation, and multi-hop behavior modeling in OpenShift.
 
 It exposes a `HelloService` with a single `SayHello` method that can:
 
