@@ -1,15 +1,15 @@
 # gRPC Delay + Forward Service
 
 A minimal Python gRPC service for chained request testing, latency simulation, and multi-hop behavior modeling in OpenShift.
+But why not use a ready made tool like grpcbin? 
+...well the images I tried out did not have a delay option - so in this particular case re-inventing the wheel was faster.
 
-It exposes a `HelloService` with a single `SayHello` method that can:
-
+So this basic grpc server exposes a `HelloService` with a single `SayHello` method that can:
 - Respond immediately
 - Add an artificial delay
 - Forward the request to another gRPC service and return the downstream response
 
 This makes it ideal for testing chained service topologies like `A → B → C`.
-
 Upon receiving a `SayHello` request, the service:
 
 1. Optionally delays its response (`DELAY_MS`)
@@ -21,7 +21,7 @@ Upon receiving a `SayHello` request, the service:
 ##
 Configuration
 
-The service is configured entirely via environment variables:
+The service is configured via environment variables:
 
 | Variable        | Default   | Description                                           |
 |----------------|-----------|-------------------------------------------------------|
@@ -38,9 +38,10 @@ The service is configured entirely via environment variables:
 1) connect to openshift cluster
 2) run install.sh
 
-Or install manually (e.g. if you want to customize )
+
+...or if really needed, install manually (e.g. if you want to customize)
 ```
-Manual installation
+Manual installation 
 # === Create projects (replace ns-a with ns-b or ns-c as needed)
 oc new-project ns-a
 
@@ -50,7 +51,6 @@ oc start-build grpc-delay-server --from-dir=. --follow
 oc new-app grpc-delay-server -l app=grpc-delay-server
 
 # === Set environment variables (adjust LISTEN_PORT and FORWARD targets based on namespace)
-
 # Example for ns-a (forwards to ns-b)
 oc set env deployment/grpc-delay-server LISTEN_PORT=50051 DELAY_MS=1000 FORWARD_HOST=grpc-delay-server.ns-b.svc.cluster.local FORWARD_PORT=50052
 
@@ -79,6 +79,8 @@ You can deploy the same image in multiple namespaces with different behavior:
 
 ## Testing with grpcurl
 ```
+# Use the tmux bash script (tmux-grpc.sh) tool to quickly create panes, port-forward and log following
+# ...or else:
 # port forward in three terminals (or panes)
 # NOTE: define the namespace, it is *not* redundant if you use termninal panes
 
