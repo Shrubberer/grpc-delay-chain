@@ -90,7 +90,7 @@ oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.n
 oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.name}') -f -n ns-b
 oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.name}') -f -n ns-c
 
-grpcurl -plaintext -import-path . -proto hello.proto -d '{"name":"Alice"}' localhost:50051 hello.HelloService/SayHello
+grpcurl -plaintext -import-path . -proto hello.proto -d '{"name":"Shrubber"}' localhost:50051 hello.HelloService/SayHello
 
 
 ```
