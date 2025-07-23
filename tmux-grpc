@@ -1,0 +1,73 @@
+####################################################################
+# Quickly set up a testing terminal with pane layout:
+# ┌───────────────────────────────────────────────────────────────┐
+# │                        Test Commands                          │
+# │        (e.g., grpcurl → localhost:50051 SayHello)            │
+# └───────────────────────────────────────────────────────────────┘
+# ┌────────────────────┬────────────────────┬────────────────────┐
+# │ Port fwd: ns-a     │ Port fwd: ns-b     │ Port fwd: ns-c     │
+# │ 50051:50051        │ 50052:50052        │ 50053:50053        │
+# ├────────────────────┼────────────────────┼────────────────────┤
+# │ Logs: ns-a         │ Logs: ns-b         │ Logs: ns-c         │
+# │ pod: grpc-delay-…  │ pod: grpc-delay-…  │ pod: grpc-delay-…  │
+# └────────────────────┴────────────────────┴────────────────────┘
+####################################################################
+
+
+#!/bin/bash
+
+SESSION=grpc-lab
+
+# Kill existing session
+tmux has-session -t $SESSION 2>/dev/null && tmux kill-session -t $SESSION
+
+# Create session with first pane (ns-a top)
+tmux new-session -d -s $SESSION -n grpc
+
+# Split bottom pane (for test commands)
+tmux split-window -v -p 30
+TEST_PANE=$(tmux display-message -p "#{pane_id}")
+
+# Capture ns-a top pane
+PANE_A_TOP=$(tmux display-message -p "#{pane_id}")
+
+# Split pane A horizontally to create pane B top
+tmux split-window -h
+PANE_B_TOP=$(tmux display-message -p "#{pane_id}")
+
+# Split pane B horizontally to create pane C top
+tmux split-window -h
+PANE_C_TOP=$(tmux display-message -p "#{pane_id}")
+
+# Now split each top pane vertically to create log panes
+tmux select-pane -t "$PANE_A_TOP"
+
+tmux split-window -v -p 50
+PANE_A_LOG=$(tmux display-message -p "#{pane_id}")
+
+tmux select-pane -t "$PANE_B_TOP"
+tmux split-window -v -p 50
+PANE_B_LOG=$(tmux display-message -p "#{pane_id}")
+
+tmux select-pane -t "$PANE_C_TOP"
+tmux split-window -v -p 50
+PANE_C_LOG=$(tmux display-message -p "#{pane_id}")
+
+# Send port-forward commands to top panes
+tmux send-keys -t "$PANE_A_TOP" 'oc port-forward svc/grpc-delay-server 50051:50051 -n ns-a' C-m
+tmux send-keys -t "$PANE_B_TOP" 'oc port-forward svc/grpc-delay-server 50052:50052 -n ns-b' C-m
+tmux send-keys -t "$PANE_C_TOP" 'oc port-forward svc/grpc-delay-server 50053:50053 -n ns-c' C-m
+
+# Send log commands to bottom panes
+tmux send-keys -t "$PANE_A_LOG" 'oc logs -f $(oc get pod -l app=grpc-delay-server -n ns-a -o jsonpath="{.items[0].metadata.name}") -n ns-a' C-m
+tmux send-keys -t "$PANE_B_LOG" 'oc logs -f $(oc get pod -l app=grpc-delay-server -n ns-b -o jsonpath="{.items[0].metadata.name}") -n ns-b' C-m
+tmux send-keys -t "$PANE_C_LOG" 'oc logs -f $(oc get pod -l app=grpc-delay-server -n ns-c -o jsonpath="{.items[0].metadata.name}") -n ns-c' C-m
+
+# Send test command to bottom pane
+tmux send-keys -t "$TEST_PANE" 'grpcurl -plaintext -import-path . -proto hello.proto -d "{\"name\":\"Baldrick\"}" localhost:50051 hello.HelloService/SayHello' C-m
+
+# Focus test pane
+tmux select-pane -t "$TEST_PANE"
+
+# Attach session
+tmux attach-session -t $SESSION
