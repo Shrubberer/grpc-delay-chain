@@ -1,0 +1,56 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grpc-delay
+  namespace: ns-a
+spec:
+  hosts:
+    - grpc-delay-server.ns-a.svc.cluster.local
+  ports:
+    - number: 50051
+      name: grpc
+      protocol: GRPC
+  http:
+    - route:
+        - destination:
+            host: grpc-delay-server.ns-a.svc.cluster.local
+            port:
+              number: 50051
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grpc-delay
+  namespace: ns-b
+spec:
+  hosts:
+    - grpc-delay-server.ns-b.svc.cluster.local
+  ports:
+    - number: 50052
+      name: grpc
+      protocol: GRPC
+  http:
+    - route:
+        - destination:
+            host: grpc-delay-server.ns-b.svc.cluster.local
+            port:
+              number: 50052
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grpc-delay
+  namespace: ns-c
+spec:
+  hosts:
+    - grpc-delay-server.ns-c.svc.cluster.local
+  ports:
+    - number: 50053
+      name: grpc
+      protocol: GRPC
+  http:
+    - route:
+        - destination:
+            host: grpc-delay-server.ns-b.svc.cluster.local
+            port:
+              number: 50053
