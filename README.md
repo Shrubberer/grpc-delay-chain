@@ -77,6 +77,8 @@ You can deploy the same image in multiple namespaces with different behavior:
 
 ---
 
+# Testing
+
 ## Testing with grpcurl
 ```
 # Use the tmux bash script (tmux-grpc.sh) tool to quickly create panes, port-forward and log following
@@ -93,6 +95,18 @@ oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.n
 oc logs $(oc get pod -l app=grpc-delay-server -o jsonpath='{.items[0].metadata.name}') -f -n ns-c
 
 grpcurl -plaintext -import-path . -proto hello.proto -d '{"name":"Shrubber"}' localhost:50051 hello.HelloService/SayHello
+```
+## Adding Istio Service Mesh
+```
+# First make sure to add the naamespaace in smmr
+oc edit smmr -n istio-system
+
+# Add annotation to deployments
+
+# add virtual services
+oc apply -f vs.yaml
+
+# Enable access logs
 
 
 ```
