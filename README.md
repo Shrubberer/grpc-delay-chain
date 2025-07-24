@@ -105,15 +105,28 @@ grpcurl -plaintext -import-path . -proto hello.proto -d '{"name":"Shrubber"}' lo
 ```
 ## Adding Istio Service Mesh
 ```
-# First make sure to add the naamespaace in smmr
+# First make sure to add the namespace in smmr
 oc edit smmr -n istio-system
 
 # Add annotation to deployments
+for ns in ns-a ns-b ns-c; do
+  oc patch deployment grpc-delay-server -n "$ns" --type='strategic' -p='{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject":"true"}}}}}'
+done
 
-# add virtual services
+# add virtual services 
 oc apply -f vs.yaml
 
-# Enable access logs
+# Enable access logs in smcp or with telemetry - eg:
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: basic
+  namespace: istio-system
+spec:
+  proxy:
+    accessLogging:
+      file:
+        name: /dev/stdout 
 
 
 ```
