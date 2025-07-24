@@ -81,8 +81,15 @@ You can deploy the same image in multiple namespaces with different behavior:
 
 ## Testing with grpcurl
 ```
-# Use the tmux bash script (tmux-grpc.sh) tool to quickly create panes, port-forward and log following
-# ...or else:
+# Suggested quick set up: Two terminals
+# 1) For grpcurl and port-forwarding: Use the tmux bash script (tmux-grpc.sh) tool to quickly create panes, port-forward and log following
+# 2) For istio sidecars: follow istio-proxy logs. For example, if json access logs are enabled:
+# oc logs $(oc get pod -l app=grpc-delay-server -n ns-a -o jsonpath='{.items[0].metadata.name}') -f -n ns-a | grep --line-buffered '^{' | jq .
+# oc logs $(oc get pod -l app=grpc-delay-server -n ns-b -o jsonpath='{.items[0].metadata.name}') -f -n ns-b | grep --line-buffered '^{' | jq .
+# oc logs $(oc get pod -l app=grpc-delay-server -n ns-c -o jsonpath='{.items[0].metadata.name}') -f -n ns-c
+#
+#
+# ...or else (manually, without tmux):
 # port forward in three terminals (or panes)
 # NOTE: define the namespace, it is *not* redundant if you use termninal panes
 
